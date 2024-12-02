@@ -113,4 +113,11 @@ public class MemoController {
         memo.update(dto);
         return new MemoResponseDto(memo);
     }
+
+    // --------------------------- Delete ---------------------------
+    @DeleteMapping("/{id}")
+    public void deleteMemo (@PathVariable Long id) {
+        // 삭제라서 따로 반환할 값이 없으므로 void로 설정
+        memoList.remove(id);
+    }
 }

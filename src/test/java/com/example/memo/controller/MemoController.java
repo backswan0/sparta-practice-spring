@@ -52,10 +52,12 @@ public class MemoController {
         저장될 객체 형태는 memo
          */
 
-        return new MemoResponseDto();
+        return new MemoResponseDto(memo);
         /*
         [4] 저장된 데이터를 MemoResponseDto 형태로 반환하기
         이후 MemoResponseDto 클래스로 돌아가서 생성자를 만들어준다.
+        return new MemoResponseDto();
+        그다음, 위와 같이 적은 곳의 () 안에 memo를 넣어준다.
          */
     }
 }

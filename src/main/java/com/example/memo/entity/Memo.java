@@ -20,4 +20,8 @@ public class Memo {
         매개변수인 MemoResponseDto dto == 요청 정보
          */
     }
+
+    public void updateTitle(MemoRequestDto dto) {
+        this.title = dto.getTitle();
+    }
 }

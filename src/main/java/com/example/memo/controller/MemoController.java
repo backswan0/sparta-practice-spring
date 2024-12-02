@@ -1,44 +1,189 @@
 package com.example.memo.controller;
 
+/*
+[해결한 문제]
+[1] 응답 코드가 세분화 되었다.
+[2] 적절한 예외를 처리했다.
+ */
+
 import com.example.memo.dto.MemoRequestDto;
 import com.example.memo.dto.MemoResponseDto;
 import com.example.memo.entity.Memo;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+// @Controller + @ResponseBody 기능 == @RestController
 
 @RestController
 @RequestMapping("/memos")
 public class MemoController {
     private final Map<Long, Memo> memoList = new HashMap<>();
 
+    // ----------------- 메모 생성 API 수정하기 (CREATE) -----------------
     @PostMapping
-    public MemoResponseDto createMemo(@RequestBody MemoRequestDto dto) {
+    public ResponseEntity<MemoResponseDto> createMemo(@RequestBody MemoRequestDto dto) {
+        /*
+        [상태 코드 따로 반환해주기]
+        [수정 전] public MemoResponseDto
+        [수정 후] ResponseEntity<MemoResponseDto>
+         */
         Long memoId = memoList.isEmpty() ? 1 : Collections.max(memoList.keySet()) + 1;
         Memo memo = new Memo(memoId, dto.getTitle(), dto.getContents());
         memoList.put(memoId, memo);
 
-        return new MemoResponseDto(memo);
+        return new ResponseEntity<>(new MemoResponseDto((memo)), HttpStatus.CREATED);
+        /*
+        [상태 코드 따로 반환해주기]
+        [수정 전] return new MemoResponseDto(memo);
+        [수정 후] return new ResponseEntity<>(new MemoResponseDto((memo)), HttpStatus.CREATED);
+                ➡️ 실제로 응답할 HttpStatus 코드를 넣어주었다.
+         */
     }
 
+    // ----------------- 메모 전체 목록 조회 API 추가하기 (READ) -----------------
+    @GetMapping
+    public ResponseEntity<List<MemoResponseDto>> findAllMemos() {
+        // 전체 조회라서 별도의 파라미터(매개변수)가 필요 없다.
+
+        // [1] List 초기화
+        List<MemoResponseDto> responseDtoList = new ArrayList<>();
+
+        // [2] HashMap<Memo>로 저장된 걸 전체 조회해서 List<MemoResponseDto> 형태로 만들어줘야 한다.
+        for (Memo memo : memoList.values()) {
+            MemoResponseDto responseDto = new MemoResponseDto(memo);
+            // 미리 만들어둔 생성자를 쓰는 것이다.
+
+            responseDtoList.add(responseDto);
+        }
+        return new ResponseEntity<>(responseDtoList, HttpStatus.OK);
+        /*
+         responseDtoList == 응답값의 body
+         return new ResponseEntity<>(HttpStatus.OK);
+         == 아무것도 없지만 정상적으로 작동했어. OK이야.
+         근데 GET인데 반환 값이 없는 게 논리적으로 맞는가???? 아니다..!
+         ➡️안 쓴다.
+         ➡️서버가 살았는지 죽었는지 확인할 때 쓴다. 왜냐하면, 서버가 정상적으로 돌아가는지만 보면 되니까.
+         */
+    }
+    /*
+    [for문 대신 Map to List: stream()을 사용한다면?]
+    responseDtoList = memoList.values().stream().map(MemoResponseDto::new).toList();
+    return new ResponseEntity<>(responseDtoList, HttpStatus.OK);
+     */
+
+    // ----------------- 메모 단건 조회 기능 수정하기 (READ) -----------------
     @GetMapping("/{id}")
-    public MemoResponseDto findMemoById(@PathVariable Long id) {
+    public ResponseEntity<MemoResponseDto> findMemoById(@PathVariable Long id) {
+        /*
+        [수정 전] public MemoResponseDto findMemoById(@PathVariable Long id)
+        [수정 후] public ResponseEntity<MemoResponseDto> findMemoById(@PathVariable Long id)
+         */
         Memo memo = memoList.get(id);
-        return new MemoResponseDto(memo);
+
+        if (memo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        /*
+        [수정 전] if문 없었음
+        [수정 후] if문을 추가하여 조회되는 메모가 없다면 404 오류 메시지가 나오도록 함
+         */
+
+        return new ResponseEntity<>(new MemoResponseDto(memo), HttpStatus.OK);
+        /*
+        [수정 전] return new MemoResponseDto(memo);
+        [수정 후] return new ResponseEntity<>(new MemoResponseDto(memo), HttpStatus.OK);
+         */
     }
 
+    // ----------------- 메모 단건의 title과 contents 둘 다 수정하기 (UPDATE-PUT) -----------------
     @PutMapping("/{id}")
-    public MemoResponseDto updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto) {
+    public ResponseEntity<MemoResponseDto> updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto) {
+        /*
+        [수정 전] public MemoResponseDto updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto)
+        [수정 후] public ResponseEntity<MemoResponseDto> updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto)
+         */
+
         Memo memo = memoList.get(id);
+
+        if (memo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        /*
+        [수정 전] if문 없었음
+        [수정 후] if문을 추가하여 조회되는 메모가 없다면 404 오류 메시지가 나오도록 함
+         */
+
+        if (dto.getTitle() == null || dto.getContents() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        /*
+        [필수 값을 검증하는 부분]
+        [참고] 필수 값인 요청 데이터는 MemoRequestDto 안에 있음
+        dto == @RequestBody MemoRequestDto dto
+         */
+
         memo.update(dto);
-        return new MemoResponseDto(memo);
+
+        return new ResponseEntity<>(new MemoResponseDto(memo), HttpStatus.OK);
+        /*
+        [수정 전] return new MemoResponseDto(memo);
+        [수정 후] return new ResponseEntity<>(new MemoResponseDto(memo), HttpStatus.OK);
+         */
     }
 
+    // ----------------- 메모 단건의 title과 contents 중에서 title만 수정하기 (UPDATE-PATCH) -----------------
+    @PatchMapping("/{id}")
+    public ResponseEntity<MemoResponseDto> updateTitle(@PathVariable Long id, @RequestBody MemoRequestDto dto) {
+        // 요구사항에 요청 데이터가 있으므로 두 번째 매개변수로 @RequestBody MemoRequestDto dto 추가
+
+        Memo memo = memoList.get(id);
+                /*
+                [데이터베이스에서 조회]
+                저장된 memoList에서 메모를 꺼내와야 메모를 수정할 수 있으니까 위와 같이 작성
+                 */
+        if (memo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (dto.getTitle() == null || dto.getContents() != null) {
+            /*
+            [1] 제목을 수정하려는데 null이면 안 되므로 dto.getTitle() == null
+            [2] dto.getContents() != null 설명
+            - MemoRequestDto 필드는 총 두 가지임: title, contents
+            - contents는 제목 수정에 필요 없음. 즉 있으면 안 됨
+            - 따라서 위 코드는 title이 null이거나 contents가 있으면 Bad Request라는 뜻
+             */
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        memo.updateTitle(dto);
+        // 위의 if문 모두 작성 후 Memo 클래스에서 updateTitle() 메서드 추가 및 호출하기
+
+        return new ResponseEntity<>(new MemoResponseDto(memo), HttpStatus.OK);
+    }
+
+    // ----------------- 메모 삭제 API 수정하기 (DELETE) -----------------
     @DeleteMapping("/{id}")
-    public void deleteMemo(@PathVariable Long id) {
-        memoList.remove(id);
+    public ResponseEntity<Void> deleteMemo(@PathVariable Long id) {
+        /*
+        [수정 전] void
+        [수정 후] ResponseEntity<Void>
+        [이유] 데이터를 응답할 필요가 없어서 Generic으로 Void를 넣어줌
+         */
+
+        /*
+        ['memoList의 Key 값에 id값이 포함되었응면 검사 가능'을 코드로 구현하기]
+        아래와 같은 if문과 if문이 없을 반환할 응답 상태 추가
+         */
+        if (memoList.containsKey(id)) {
+            memoList.remove(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        // 검사 기능이 작동하지 않을 때
     }
 }
 
@@ -117,4 +262,3 @@ private final Map<Long, Memo> memoList = new HashMap<>();
 [deleteMemo() 메서드 특징]
 - CRUD의 DELETE 가능이라서 따로 반환할 값이 없으므로 void로 설정한다.
   */
-

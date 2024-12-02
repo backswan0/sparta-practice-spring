@@ -9,10 +9,7 @@ package com.example.memo.controller;
 import com.example.memo.dto.MemoRequestDto;
 import com.example.memo.dto.MemoResponseDto;
 import com.example.memo.entity.Memo;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +29,7 @@ public class MemoController {
     private final Map<Long, Memo> memoList = new HashMap<>();
     // key 값 = Long
 
+    // --------------------------- Create ---------------------------
     @PostMapping
     /*
     생성이기 때문에 @PostMapping을 사용한다.
@@ -84,4 +82,14 @@ public class MemoController {
         그다음, 위와 같이 적은 곳의 () 안에 memo를 넣어준다.
          */
     }
+
+    @GetMapping("/{id}")
+    // 이미 prefix로 /memos를 적었으므로 식별자를 추가로 적었다.
+    public MemoResponseDto findMemoById(@PathVariable Long id) {
+        // 식별자를 파라미터(매개변수)로 바인딩할 때는 @PathVariable을 사용한다.
+        Memo memo = memoList.get(id);
+
+        return new MemoResponseDto(memo);
+    }
+
 }

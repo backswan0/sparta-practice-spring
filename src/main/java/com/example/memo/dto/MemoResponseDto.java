@@ -10,7 +10,7 @@ public class MemoResponseDto {
     private String contents;
 
     // MemoController 작성이 끝나면 생성자 만들기
-    public MemoResponseDto (Memo memo) {
+    public MemoResponseDto(Memo memo) {
         this.id = memo.getId();
         this.title = memo.getTitle();
         this.contents = memo.getContents();
@@ -19,6 +19,4 @@ public class MemoResponseDto {
          MemoResponseDto 형태로 바뀌어서 응답이 되어야 한다.
          */
     }
-
-
 }

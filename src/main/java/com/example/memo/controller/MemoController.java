@@ -1,9 +1,17 @@
 package com.example.memo.controller;
+/*
+[절대 잊으면 안 되는 것]
+첫째, src>test>java에 클래스를 넣지 않았는지 확인하자
+     ➡️src>main>java이다. 그렇게 안 하고 postman을 실행하면 404 오류 뜬다.
+둘째, import가 두 번 되지 않았는지 꼭 살펴보자.
+ */
 
 import com.example.memo.dto.MemoRequestDto;
 import com.example.memo.dto.MemoResponseDto;
 import com.example.memo.entity.Memo;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -11,10 +19,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/memos")
+/*
+[@RequestMapping]
+- @PostMapping 사용 후 @RequestMapping을 추가하자.
+- prefix하는 URL을 설정할 때 사용한다.
+  == prefix처럼 하위 메서드 전체에 영향을 주기 때문에 'prefix'라고 표현함
+- 공통적으로 들어가는 /memos라는 URL을 적어둔다.
+ */
+
 public class MemoController {
     private final Map<Long, Memo> memoList = new HashMap<>();
     // key 값 = Long
 
+    @PostMapping
+    /*
+    생성이기 때문에 @PostMapping을 사용한다.
+    @PostMapping("/healthy") 이렇게 적으면?
+    == localhost:8080/memos/healthy
+    == 영향 범위는 메서드의 블럭만. 즉 다른 메서드에 영향을 주려면 해당 메서드 위에 다시 annotation을 써야 한다.
+     */
     public MemoResponseDto createMemo(@RequestBody MemoRequestDto dto) {
      /*
      [해야 할 일]
@@ -36,7 +60,7 @@ public class MemoController {
         이후 추가: Long memoId =
          */
 
-       Memo memo = new Memo(memoId, dto.getTitle(), dto.getContents());
+        Memo memo = new Memo(memoId, dto.getTitle(), dto.getContents());
         /*
         [2] 요청받은 데이터로 Memo 객체 생성하기
         MemoRequestDto 형태로 요청 받았기 때문에 Memo 객체로 바꿔줘야 한다.

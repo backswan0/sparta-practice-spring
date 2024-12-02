@@ -106,6 +106,18 @@ public class MemoController {
         [수정 후] public ResponseEntity<MemoResponseDto> updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto)
          */
 
+        /*
+        입력값만으로 판단할 수 있으므로  if (dto.getTitle() == null || dto.getContents() == null) 먼저
+         */
+        if (dto.getTitle() == null || dto.getContents() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        /*
+        [필수 값을 검증하는 부분]
+        [참고] 필수 값인 요청 데이터는 MemoRequestDto 안에 있음
+        dto == @RequestBody MemoRequestDto dto
+         */
+
         Memo memo = memoList.get(id);
 
         if (memo == null) {
@@ -114,15 +126,6 @@ public class MemoController {
         /*
         [수정 전] if문 없었음
         [수정 후] if문을 추가하여 조회되는 메모가 없다면 404 오류 메시지가 나오도록 함
-         */
-
-        if (dto.getTitle() == null || dto.getContents() == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        /*
-        [필수 값을 검증하는 부분]
-        [참고] 필수 값인 요청 데이터는 MemoRequestDto 안에 있음
-        dto == @RequestBody MemoRequestDto dto
          */
 
         memo.update(dto);
@@ -139,15 +142,6 @@ public class MemoController {
     public ResponseEntity<MemoResponseDto> updateTitle(@PathVariable Long id, @RequestBody MemoRequestDto dto) {
         // 요구사항에 요청 데이터가 있으므로 두 번째 매개변수로 @RequestBody MemoRequestDto dto 추가
 
-        Memo memo = memoList.get(id);
-                /*
-                [데이터베이스에서 조회]
-                저장된 memoList에서 메모를 꺼내와야 메모를 수정할 수 있으니까 위와 같이 작성
-                 */
-        if (memo == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
         if (dto.getTitle() == null || dto.getContents() != null) {
             /*
             [1] 제목을 수정하려는데 null이면 안 되므로 dto.getTitle() == null
@@ -158,6 +152,16 @@ public class MemoController {
              */
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        Memo memo = memoList.get(id);
+                /*
+                [데이터베이스에서 조회]
+                저장된 memoList에서 메모를 꺼내와야 메모를 수정할 수 있으니까 위와 같이 작성
+                 */
+        if (memo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         memo.updateTitle(dto);
         // 위의 if문 모두 작성 후 Memo 클래스에서 updateTitle() 메서드 추가 및 호출하기
 

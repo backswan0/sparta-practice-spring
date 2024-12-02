@@ -6,6 +6,13 @@ package com.example.memo.controller;
 [2] 적절한 예외를 처리했다.
  */
 
+/*
+[DTO란?]
+- Data Transfer Object
+- 계층 간 데이터를 전달할 때 사용되는 객체
+- 여기서 예기하는 계층은 바로 layered architecture의 각 layer이다.
+ */
+
 import com.example.memo.dto.MemoRequestDto;
 import com.example.memo.dto.MemoResponseDto;
 import com.example.memo.entity.Memo;

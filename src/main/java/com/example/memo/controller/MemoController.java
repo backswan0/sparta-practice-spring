@@ -83,6 +83,7 @@ public class MemoController {
          */
     }
 
+    // --------------------------- Read ---------------------------
     @GetMapping("/{id}")
     // 이미 prefix로 /memos를 적었으므로 식별자를 추가로 적었다.
     public MemoResponseDto findMemoById(@PathVariable Long id) {
@@ -92,4 +93,24 @@ public class MemoController {
         return new MemoResponseDto(memo);
     }
 
+    // --------------------------- Update ---------------------------
+    @PutMapping("/{id}")
+    /*
+    [1] 전체 수정이므로 Put이다.
+    [2] 단건을 수정해야 하므로 아까처럼 경로변수가 필요하다.
+    [3] id값 뿐만 아니라 우리가 어떤 데이터로 수정할지 그 데이터도 요청 받아야 한다.
+        ➡️RequestDto 형태로 받기로 한 걸 기억하자!
+        ➡️지금은 title과 contents 둘 다 수정할 수 있다고 가정했다.
+        == @PathVariable Long id 옆에 @RequestBody MemoRequestDto dto를 작성한 이유
+     */
+    public MemoResponseDto updateMemoById(@PathVariable Long id, @RequestBody MemoRequestDto dto) {
+        Memo memo = memoList.get(id);
+        /*
+        - 수정하려면 우선 저장된 메모를 꺼내와야 하므로 위와 같이 작성한다.
+        - 이후 Memo 클래스로 돌아가서 update() 메서드를 새로 만들자.
+         */
+
+        memo.update(dto);
+        return new MemoResponseDto(memo);
+    }
 }
